@@ -1,10 +1,11 @@
 import React, {Fragment, useState} from 'react';
+import {Link,Navigate} from 'react-router-dom';
 import {connect} from 'react-redux';
-import axios from 'axios';
 import {setAlert} from '../../../actions/alert';
+import {register} from '../../../actions/auth';
 import PropTypes from 'prop-types';
 
-const Register = ({setAlert}) => {
+const Register = ({setAlert,register,isAuthenticated}) => {
     const [formData,setFormData]=useState({ 
         name: '',
         email: '',
@@ -21,26 +22,13 @@ const Register = ({setAlert}) => {
         if(password!==password2){
             setAlert('Passwords do not match', 'danger');
         }else{
-            const newUser={
-                name,
-                email,
-                password
-            };
-            try {
-                const config={
-                    headers:{
-                        'Content-Type':'application/json'
-                    }
-                };
-                const body=JSON.stringify(newUser);
-                const res=await axios.post('/api/users',body,config);
-                console.log(res.data);
-            } catch (err) {
-                console.error(err);
-            }
+            register({name,email,password});
         }
-        // Handle form submission logic here
     };
+
+    if(isAuthenticated){
+        return <Navigate to="/" replace />
+    }
 
     return <Fragment><h1 className="large text-primary">Sign Up</h1>
       <p className="lead"><i className="fas fa-user"></i> Create Your Account</p>
@@ -78,13 +66,19 @@ const Register = ({setAlert}) => {
         <input type="submit" className="btn btn-primary" value="Register" />
       </form>
       <p className  ="my-1">
-        Already have an account? <a href="login.html">Sign In</a>
+        Already have an account? <Link to="/login">Sign In</Link>
       </p></Fragment>;
 };
 
 Register.propTypes={
-    setAlert:PropTypes.func.isRequired
+    setAlert:PropTypes.func.isRequired,
+    register:PropTypes.func.isRequired,
+    isAuthenticated:PropTypes.bool
 };
 
+const mapStateToProps=state=>({
+    isAuthenticated:state.auth.isAuthenticated
+})
 
-export default connect(null,{setAlert})(Register);
+
+export default connect(mapStateToProps,{setAlert,register})(Register);
