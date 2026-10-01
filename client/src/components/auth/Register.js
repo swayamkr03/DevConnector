@@ -1,8 +1,8 @@
 import React, {Fragment, useState} from 'react';
 import {Link,Navigate} from 'react-router-dom';
 import {connect} from 'react-redux';
-import {setAlert} from '../../../actions/alert';
-import {register} from '../../../actions/auth';
+import {setAlert} from '../../actions/alert';
+import {register} from '../../actions/auth';
 import PropTypes from 'prop-types';
 
 const Register = ({setAlert,register,isAuthenticated}) => {
@@ -27,7 +27,7 @@ const Register = ({setAlert,register,isAuthenticated}) => {
     };
 
     if(isAuthenticated){
-        return <Navigate to="/" replace />
+        return <Navigate to="/dashboard" replace />
     }
 
     return <Fragment><h1 className="large text-primary">Sign Up</h1>
