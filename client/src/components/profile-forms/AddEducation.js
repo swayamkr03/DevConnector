@@ -1,3 +1,4 @@
+import Icon from '../ui/Icon';
 import React,{Fragment,useState}from 'react'
 import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
@@ -6,6 +7,7 @@ import {Link,useNavigate} from 'react-router-dom'
 
 const AddEducation = props => {
     const navigate=useNavigate();
+    const [submitting, setSubmitting] = useState(false);
 
     const [formData,setFormData]=useState({
         school:'',
@@ -23,55 +25,62 @@ const AddEducation = props => {
     const onChange=e=>setFormData({...formData,[e.target.name]:e.target.value});
   return (
     <Fragment>
-        <h1 class="large text-primary">
+        <h1 className="large text-primary">
        Add An Education
       </h1>
-      <p class="lead">
-        <i class="fas fa-code-branch"></i> Add any developer/programming
-        positions that you have had in the past
+      <p className="lead">
+        <Icon name="branch" /> Add your studies, qualifications, and learning experience
       </p>
       <small>* = required field</small>
-      <form class="form" onSubmit={e=>{
+      <form className="form" onSubmit={async e=>{
         e.preventDefault();
-        props.addEducation(formData,navigate);
+        if (submitting) return;
+        setSubmitting(true);
+        try { await props.addEducation(formData,navigate); } finally { setSubmitting(false); }
       } }>
-        <div class="form-group">
-          <input type="text" placeholder="* School" name="school" value={school} onChange={onChange} required />
+        <div className="form-group">
+          <label htmlFor="AddEducation-school">School</label>
+          <input id="AddEducation-school" type="text" placeholder="* School" name="school" value={school} onChange={onChange} required />
         </div>
-        <div class="form-group">
-          <input type="text" placeholder="* Degree" name="degree" value={degree} onChange={onChange} required />
+        <div className="form-group">
+          <label htmlFor="AddEducation-degree">Degree</label>
+          <input id="AddEducation-degree" type="text" placeholder="* Degree" name="degree" value={degree} onChange={onChange} required />
         </div>
-        <div class="form-group">
-          <input type="text" placeholder="Field of Study" name="fieldofstudy" value={fieldofstudy   } onChange={onChange} />
+        <div className="form-group">
+          <label htmlFor="AddEducation-fieldofstudy">Field of study</label>
+          <input id="AddEducation-fieldofstudy" type="text" placeholder="Field of Study" name="fieldofstudy" value={fieldofstudy   } onChange={onChange} />
         </div>
-        <div class="form-group">
-          <h4>From Date</h4>
-          <input type="date" name="from" value={from} onChange={onChange} />
+        <div className="form-group">
+
+          <label htmlFor="AddEducation-from">From date</label>
+          <input id="AddEducation-from" type="date" name="from" value={from} onChange={onChange} />
         </div>
-         <div class="form-group">
-          <p><input type="checkbox" name="current" checked={current} onChange={e=>{
+         <div className="form-group">
+          <p><input type="checkbox" aria-label="Currently here" name="current" checked={current} onChange={e=>{
             setFormData({...formData,current:e.target.checked});
             toggleDisabled(!toDateDisabled);
           }} /> Current School</p>
         </div>
-        <div class="form-group">
-          <h4>To Date</h4>
-          <input type="date" name="to" value={to} onChange={onChange} disabled={toDateDisabled} />
+        <div className="form-group">
+
+          <label htmlFor="AddEducation-to">To date</label>
+          <input id="AddEducation-to" type="date" name="to" value={to} onChange={onChange} disabled={toDateDisabled} />
         </div>
-        <div class="form-group">
-          <textarea
+        <div className="form-group">
+          <label htmlFor="AddEducation-description">Description</label>
+          <textarea id="AddEducation-description"
             name="description"
             cols="30"
             rows="5"
-            placeholder="Job Description"
+            placeholder="Describe your studies"
             value={description}
             onChange={onChange}
           ></textarea>
         </div>
-        <input type="submit" class="btn btn-primary my-1" />
+        <input type="submit" className="btn btn-primary my-1" disabled={submitting} aria-busy={submitting} value={submitting ? 'Saving...' : 'Save changes'} />
         <Link className="btn btn-light my-1" to="/dashboard">Go Back</Link>
       </form>
-      
+
     </Fragment>
   )
 }

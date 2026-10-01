@@ -10,30 +10,30 @@ const Education = ({education,deleteEducation}) => {
     const educations=education.map(edu=>(
         <tr key={edu._id}>
             <td>{edu.school}</td>
-            <td class="hide-sm">{edu.degree}</td>
-            <td class="hide-sm">
+            <td className="hide-sm">{edu.degree}</td>
+            <td className="hide-sm">
                 <Moment format="YYYY/MM/DD">{edu.from}</Moment> -{' '}
-                {edu.to===null?' Now':<Moment format="YYYY/MM/DD">{edu.to}</Moment>}
+                {edu.current || !edu.to?' Now':<Moment format="YYYY/MM/DD">{edu.to}</Moment>}
             </td>
-            <button onClick={()=>deleteEducation(edu._id)} class="btn btn-danger">Delete</button>
+            <td><button onClick={()=>deleteEducation(edu._id)} className="btn btn-danger">Delete</button></td>
         </tr>
     ));
   return (
     <Fragment>
-        <h2 class="my-2">Education Credentials</h2>
-        <table class="table">
+        <h2 className="my-2">Education Credentials</h2>
+        <div className="table-wrap" role="region" aria-label="Education credentials" tabIndex="0"><table className="table">
           <thead>
             <tr>
               <th>School</th>
-              <th class="hide-sm">Degree</th>
-                <th class="hide-sm">Years</th>
-                <th class="hide-sm">Actions</th>
+              <th className="hide-sm">Degree</th>
+                <th className="hide-sm">Years</th>
+                <th className="hide-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {educations}
+            {educations.length ? educations : <tr><td colSpan="4">No education added yet.</td></tr>}
           </tbody>
-        </table>
+        </table></div>
       </Fragment>
     )
 }

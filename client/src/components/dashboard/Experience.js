@@ -10,30 +10,30 @@ const Experience = ({experience,deleteExperience}) => {
     const experiences=experience.map(exp=>(
         <tr key={exp._id}>
             <td>{exp.company}</td>
-            <td class="hide-sm">{exp.title}</td>
-            <td class="hide-sm">
+            <td className="hide-sm">{exp.title}</td>
+            <td className="hide-sm">
                 <Moment format="YYYY/MM/DD">{exp.from}</Moment> -{' '}
-                {exp.to===null?' Now':<Moment format="YYYY/MM/DD">{exp.to}</Moment>}
+                {exp.current || !exp.to?' Now':<Moment format="YYYY/MM/DD">{exp.to}</Moment>}
             </td>
-            <button onClick={()=>deleteExperience(exp._id)} class="btn btn-danger">Delete</button>
+            <td><button onClick={()=>deleteExperience(exp._id)} className="btn btn-danger">Delete</button></td>
         </tr>
     ));
   return (
     <Fragment>
-        <h2 class="my-2">Experience Credentials</h2>
-        <table class="table">
+        <h2 className="my-2">Experience Credentials</h2>
+        <div className="table-wrap" role="region" aria-label="Experience credentials" tabIndex="0"><table className="table">
           <thead>
             <tr>
               <th>Company</th>
-              <th class="hide-sm">Title</th>
-                <th class="hide-sm">Years</th>
-                <th class="hide-sm">Actions</th>
+              <th className="hide-sm">Title</th>
+                <th className="hide-sm">Years</th>
+                <th className="hide-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {experiences}
+            {experiences.length ? experiences : <tr><td colSpan="4">No experience added yet.</td></tr>}
           </tbody>
-        </table>
+        </table></div>
       </Fragment>
     )
 }

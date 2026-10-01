@@ -1,3 +1,4 @@
+import Icon from '../ui/Icon';
 import React,{Fragment,useEffect} from 'react';
 import {Link} from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -15,17 +16,19 @@ const Dashboard = ({getCurrentProfile,auth:{user},profile:{profile,loading},dele
     },[getCurrentProfile]);
 
     return loading && profile===null ? <Spinner /> : <Fragment>
-        <h1 className="large text-primary">Dashboard</h1>
+        <span className="eyebrow">YOUR WORKSPACE</span><h1 className="large text-primary">Dashboard</h1>
         <p className="lead">
-            <i className="fas fa-user"></i> Welcome {user && user.name}
+            <Icon name="users" /> Welcome {user && user.name}
         </p>
         {profile!==null ? <Fragment>
             <DashboardAction />
+            <div className="stats-row"><div className="stat"><strong>{profile.skills.length}</strong><span>Skills</span></div><div className="stat"><strong>{profile.experience.length}</strong><span>Experience entries</span></div><div className="stat"><strong>{profile.education.length}</strong><span>Education entries</span></div></div>
+            <Link to={'/profile/' + user?._id} className="btn">View public profile</Link>
             <Experience experience={profile.experience}/>
             <Education education={profile.education}/>
-            <div>
+            <div className="danger-zone"><h2>Delete account</h2><p>Permanently remove your account and profile. This action cannot be undone.</p>
                 <button className="btn btn-danger" onClick={()=>deleteAccount()}>
-                    <i className="fas fa-user-minus"></i>
+                    <Icon name="users" />
                     Delete My Account
                 </button>
             </div>

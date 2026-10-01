@@ -1,10 +1,11 @@
-import React, {Fragment, useState} from 'react';
+import React, {useState} from 'react';
 import {Link,Navigate} from 'react-router-dom';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {login} from '../../actions/auth';
 
 const Login = ({login,isAuthenticated}) => {
+    const [submitting, setSubmitting] = useState(false);
     const [formData,setFormData]=useState({ 
         email: '',
         password: '',
@@ -16,7 +17,9 @@ const Login = ({login,isAuthenticated}) => {
 
     const onSubmit=async e=>{
         e.preventDefault();
-        login(email,password);
+        if (submitting) return;
+        setSubmitting(true);
+        try { await login(email,password); } finally { setSubmitting(false); }
     };
 
     //redirect if logged in
@@ -25,29 +28,31 @@ const Login = ({login,isAuthenticated}) => {
     }
 
 
-    return <Fragment><h1 className="large text-primary">Sign In</h1>
-      <p className="lead"><i className="fas fa-user"></i> Sign into Your Account</p>
-      <form className="form" action="create-profile.html" onSubmit={onSubmit}>
+    return <section className="auth-page"><h1 className="large text-primary">Sign In</h1>
+      <p className="lead">Welcome back. Your community is waiting.</p>
+      <form className="form" onSubmit={onSubmit}>
         <div className="form-group">
-          <input type="email" placeholder="Email Address" name="email" value={email} onChange={onChange} />
+          <label htmlFor="email">Email address</label>
+          <input type="email" placeholder="Email Address" id="email" autoComplete="email" name="email" value={email} onChange={onChange} />
 
         </div>
         <div className="form-group">
+          <label htmlFor="password">Password</label>
           <input
             type="password"
             placeholder="Password"
-            name="password"
+            id="password" autoComplete="current-password" name="password"
             value={password}    
             onChange={onChange}
             minLength="6"
           />
         </div>
         
-        <input type="submit" className="btn btn-primary" value="Sign In" />
+        <input type="submit" className="btn btn-primary" disabled={submitting} aria-busy={submitting} value={submitting ? 'Please wait...' : 'Sign In'} />
       </form>
       <p className  ="my-1">
         Don't have an account? <Link to="/register">Sign Up</Link>
-      </p></Fragment>;
+      </p></section>;
 };
 
 const mapStateToProps=state=>({
