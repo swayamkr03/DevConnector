@@ -14,9 +14,7 @@ import setAuthToken from '../utils/setAuthToken';
 
 //Load User
 export const loadUser=()=>async dispatch=>{
-    if(localStorage.token){
-        setAuthToken(localStorage.token);
-    }
+    setAuthToken(localStorage.token);
     try{
         const res=await axios.get('/api/auth');
         dispatch({
@@ -24,6 +22,7 @@ export const loadUser=()=>async dispatch=>{
             payload:res.data
         });
     } catch (err) {
+        setAuthToken(null);
         dispatch({
             type:AUTH_ERROR
         });
@@ -91,6 +90,7 @@ export const login=(email,password)=>async dispatch=>{
 
 //Logout /Clear Profile
 export const logout=()=>dispatch=>{
+    setAuthToken(null);
     dispatch({type:CLEAR_PROFILE});
     dispatch({type:LOGOUT});
 }

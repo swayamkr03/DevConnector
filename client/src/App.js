@@ -1,5 +1,5 @@
 import React,{Fragment,useEffect} from 'react';
-import {BrowserRouter as Router,Route,Routes} from 'react-router-dom';
+import {BrowserRouter as Router,Route,Routes,Outlet} from 'react-router-dom';
 import './App.css';
 import Navbar from './components/layout/Navbar';
 import Landing from './components/layout/Landing';
@@ -16,6 +16,11 @@ import CreateProfile from './components/profile-forms/CreateProfile';
 import EditProfile from './components/profile-forms/EditProfile';
 import AddExperience from './components/profile-forms/AddExperience';
 import AddEducation from './components/profile-forms/AddEducation';
+import Profiles from './components/profiles/Profiles';
+import Profile from './components/profile/Profile';
+
+import Posts from './components/posts/Posts';
+import Post from './components/post/Post';
 
 if(localStorage.token){
   setAuthToken(localStorage.token);
@@ -33,12 +38,13 @@ const App=()=> {
         <Navbar />
         <Routes>
           <Route path='/' element={<Landing />} />
-        </Routes>
-        <section className="container">
-          <Alert/>
-          <Routes>
+          <Route element={<section className="container"><Alert/><Outlet/></section>}>
             <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
+            <Route path='/posts' element={<PrivateRoute><Posts /></PrivateRoute>} />
+            <Route path='/posts/:id' element={<PrivateRoute><Post /></PrivateRoute>} />
+            <Route path='/profiles' element={<Profiles />} />
+            <Route path='/profile/:id' element={<Profile />} />
             <Route
               path='/dashboard'
               element={
@@ -75,8 +81,8 @@ const App=()=> {
                 </PrivateRoute>
               }
             />
-          </Routes>
-        </section>
+          </Route>
+        </Routes>
       </Fragment>
     </Router>
   </Provider>

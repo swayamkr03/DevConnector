@@ -37,6 +37,7 @@ const authReducer=(state=initialState,action)=>{
             return {
                 ...state,
                 token:null,
+                user:null,
                 isAuthenticated:false,
                 loading:false
             };
@@ -52,6 +53,7 @@ const authReducer=(state=initialState,action)=>{
             return {
                 ...state,
                 token:null,
+                user:null,
                 isAuthenticated:false,
                 loading:false
             };

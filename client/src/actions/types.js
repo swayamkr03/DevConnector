@@ -20,3 +20,17 @@ export const CLEAR_PROFILE='CLEAR_PROFILE';
 export const UPDATE_PROFILE='UPDATE_PROFILE';
 
 export const DELETE_ACCOUNT='DELETE_ACCOUNT';
+
+export const GET_PROFILES='GET_PROFILES';
+
+export const GET_REPOS='GET_REPOS';
+export const REPOS_LOADING='REPOS_LOADING';
+export const REPOS_ERROR='REPOS_ERROR';
+export const POST_LOADING='POST_LOADING';
+export const GET_POSTS='GET_POSTS';
+export const GET_POST='GET_POST';
+export const POST_ERROR='POST_ERROR';
+export const ADD_POST='ADD_POST';
+export const DELETE_POST='DELETE_POST';
+export const UPDATE_LIKES='UPDATE_LIKES';
+export const UPDATE_COMMENTS='UPDATE_COMMENTS';

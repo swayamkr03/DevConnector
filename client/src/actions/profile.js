@@ -6,11 +6,16 @@ import{
     PROFILE_ERROR,
     DELETE_ACCOUNT,
     CLEAR_PROFILE,
-    UPDATE_PROFILE
+    UPDATE_PROFILE,
+    GET_PROFILES,
+    GET_REPOS,
+    REPOS_LOADING,
+    REPOS_ERROR
 } from './types'
 
-
+//Get current user profile
 export const getCurrentProfile=()=>async dispatch=>{
+    dispatch({type:CLEAR_PROFILE});
     try{
         const res=await axios.get('/api/profile/me');
         dispatch({
@@ -21,10 +26,68 @@ export const getCurrentProfile=()=>async dispatch=>{
     }catch(err){
         dispatch({
             type:PROFILE_ERROR,
-            payload:{msg:err.response.statusText,status:err.response.status}
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
         });
     }
 };
+
+//Get all profiles
+export const getProfiles=()=>async dispatch=>{
+    dispatch({type:CLEAR_PROFILE});
+
+    try{
+        const res=await axios.get('/api/profile');
+        dispatch({
+            type:GET_PROFILES,
+            payload:res.data
+        });
+
+    }catch(err){
+        dispatch({
+            type:PROFILE_ERROR,
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
+        });
+    }
+};
+
+//Get profile by ID
+export const getProfileById=userId=>async dispatch=>{
+    dispatch({type:CLEAR_PROFILE});
+
+    try{
+        const res=await axios.get(`/api/profile/user/${userId}`);
+        dispatch({
+            type:GET_PROFILE,
+            payload:res.data
+        });
+
+    }catch(err){
+        dispatch({
+            type:PROFILE_ERROR,
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
+        });
+    }
+};
+
+//Get Github repos
+export const getGithubRepos=username=>async dispatch=>{
+    dispatch({type:REPOS_LOADING});
+
+    try{
+        const res=await axios.get(`/api/profile/github/${username}`);
+        dispatch({
+            type:GET_REPOS,
+            payload:res.data
+        });
+
+    }catch(err){
+        dispatch({
+            type:REPOS_ERROR,
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
+        });
+    }
+};
+
 
 //Create or update profile
 export const createProfile=(formData,navigate,edit=false)=>async dispatch=>{
@@ -55,7 +118,7 @@ export const createProfile=(formData,navigate,edit=false)=>async dispatch=>{
                 
         dispatch({
             type:PROFILE_ERROR,
-            payload:{msg:err.response.statusText,status:err.response.status}
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
         });
     }
 };
@@ -83,7 +146,7 @@ export const addExperience=(formData,navigate)=>async dispatch=>{
         }
         dispatch({
             type:PROFILE_ERROR,
-            payload:{msg:err.response.statusText,status:err.response.status}
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
         });
     }
 }
@@ -111,7 +174,7 @@ export const addEducation=(formData,navigate)=>async dispatch=>{
         }
         dispatch({
             type:PROFILE_ERROR,
-            payload:{msg:err.response.statusText,status:err.response.status}
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
         });
     }
 };
@@ -128,7 +191,7 @@ export const deleteExperience=id=>async dispatch=>{
     }catch(err){
         dispatch({
             type:PROFILE_ERROR,
-            payload:{msg:err.response.statusText,status:err.response.status}
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
         });
     }
 };
@@ -145,7 +208,7 @@ export const deleteEducation=id=>async dispatch=>{
     }catch(err){
         dispatch({
             type:PROFILE_ERROR,
-            payload:{msg:err.response.statusText,status:err.response.status}
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
         });
     }
 };
@@ -166,7 +229,7 @@ export const deleteAccount=id=>async dispatch=>{
     }catch(err){
         dispatch({
             type:PROFILE_ERROR,
-            payload:{msg:err.response.statusText,status:err.response.status}
+            payload:{msg:err.response?.data?.msg || err.response?.statusText || 'Unable to reach server',status:err.response?.status}
         });
     }
 }

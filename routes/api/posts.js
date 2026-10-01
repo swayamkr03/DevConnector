@@ -5,18 +5,22 @@ const auth = require('../../middleware/auth');
 
 const Post = require('../../models/Post');
 const User = require('../../models/User');
-const Profile = require('../../models/Profile');
+const { isValidObjectId } = require('mongoose');
+
+router.param('id', (req, res, next, id) => {
+  if (!isValidObjectId(id)) return res.status(404).json({ msg: 'Post not found' });
+  next();
+});
 
 
 // @route   POST api/posts
 // @desc    Create a post
-// @access  Public
+// @access  Private
 router.post('/', [
   auth,
   [
     check('text', 'Text is required')
-      .not()
-      .isEmpty()
+      .isString().bail().trim().notEmpty()
   ]
 ],async (req, res) => {
   const errors = validationResult(req);
@@ -25,6 +29,7 @@ router.post('/', [
   }
 try {
   const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(401).json({ msg: 'User not found' });
   const newPost = new Post({
     text: req.body.text,
     name: user.name,
@@ -42,7 +47,7 @@ try {
 
 // @route   GET api/posts
 // @desc    Get all posts
-// @access  Public
+// @access  Private
 router.get('/', auth, async (req, res) => {
   try {
     const posts = await Post.find().sort({ date: -1 });
@@ -55,11 +60,10 @@ router.get('/', auth, async (req, res) => {
 
 // @route   GET api/posts/:id
 // @desc    Get post by ID
-// @access  Public
+// @access  Private
 router.get('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
@@ -80,7 +84,6 @@ router.get('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
@@ -90,7 +93,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
-    await post.remove();
+    await post.deleteOne();
 
     res.json({ msg: 'Post removed' });
   } catch (err) {
@@ -108,6 +111,7 @@ router.delete('/:id', auth, async (req, res) => {
 router.put('/like/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ msg: 'Post not found' });
 
     // Check if the post has already been liked by this user
     if (post.likes.filter(like => like.user.toString() === req.user.id).length > 0) {
@@ -131,6 +135,7 @@ router.put('/like/:id', auth, async (req, res) => {
 router.put('/unlike/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ msg: 'Post not found' });
 
     // Check if the post has not yet been liked by this user
     if (post.likes.filter(like => like.user.toString() === req.user.id).length === 0) {
@@ -158,8 +163,7 @@ router.post('/comment/:id', [
   auth,
   [
     check('text', 'Text is required')
-      .not()
-      .isEmpty()
+      .isString().bail().trim().notEmpty()
   ]
 ], async (req, res) => {
   const errors = validationResult(req);
@@ -169,7 +173,9 @@ router.post('/comment/:id', [
 
   try {
     const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(401).json({ msg: 'User not found' });
     const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ msg: 'Post not found' });
 
     const newComment = {
       text: req.body.text,
@@ -195,6 +201,7 @@ router.post('/comment/:id', [
 router.delete('/comment/:id/:comment_id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ msg: 'Post not found' });
 
     // Pull out comment
     const comment = post.comments.find(comment => comment.id === req.params.comment_id);

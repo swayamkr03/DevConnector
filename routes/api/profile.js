@@ -1,6 +1,4 @@
 const express = require('express');
-const request = require('request');
-const config = require('config');
 const { check, validationResult } = require('express-validator');
 const router = express.Router();
 const auth = require('../../middleware/auth');
@@ -247,36 +245,26 @@ router.delete('/education/:edu_id',auth,async (req,res)=>{
 // @route   GET api/profile/github/:username
 // @desc    Get user repos from Github
 // @access  Public
-router.get('/github/:username', (req, res) => {
+router.get('/github/:username', async (req, res) => {
+    if (!/^[a-zA-Z0-9-]{1,39}$/.test(req.params.username)) {
+        return res.status(400).json({ msg: 'Invalid Github username' });
+    }
     try {
-        const options = {
-
-            uri: `https://api.github.com/users/${req.params.username}/repos?per_page=5&sort=created:asc&client_id=${config.get('githubClientId')}&client_secret=${config.get('githubClientSecret')}`,
-            method: 'GET',
-            headers: { 'user-agent': 'node.js' }
-        };
-
-        request(options, (error, response, body) => {
-            if (error) {
-                console.error(error.message);
-                return res.status(502).json({ msg: 'Unable to fetch Github repositories' });
-            }
-
-            if (!response || response.statusCode !== 200) {
-                return res.status(404).json({ msg: 'No Github profile found' });
-            }
-
-            try {
-                const repos = JSON.parse(body);
-                return res.json(repos);
-            } catch (parseError) {
-                console.error(parseError.message);
-                return res.status(502).json({ msg: 'Invalid response from Github' });
-            }
-        });
+        const headers = { 'User-Agent': 'DevConnector', Accept: 'application/vnd.github+json' };
+        if (process.env.GITHUB_TOKEN) headers.Authorization = 'Bearer ' + process.env.GITHUB_TOKEN;
+        const response = await fetch(
+            'https://api.github.com/users/' + encodeURIComponent(req.params.username) + '/repos?per_page=5&sort=created&direction=desc',
+            { headers, signal: AbortSignal.timeout(10000) }
+        );
+        if (!response.ok) {
+            const status = response.status === 404 ? 404 : 502;
+            return res.status(status).json({ msg: response.status === 404 ? 'Github user not found' : 'Github is unavailable or its rate limit was reached. Please try later.' });
+        }
+        const repos = await response.json();
+        if (!Array.isArray(repos)) throw new Error('Invalid Github response');
+        res.json(repos);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(502).json({ msg: 'Unable to fetch Github repositories' });
     }
 });
 
