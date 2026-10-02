@@ -196,10 +196,11 @@ Run frontend tests from the project root:
 npm test --prefix client -- --watchAll=false --runInBand
 ```
 
-Run backend tests:
+Run backend tests (build the frontend first because deployment tests check the actual production assets):
 
 ```bash
-node --test --test-isolation=none tests/posts.test.js tests/github.test.js
+npm run build --prefix client
+node --test --test-isolation=none tests/deployment.test.js tests/posts.test.js tests/github.test.js
 ```
 
 Frontend tests cover profile rendering, safe links, loading and error handling, post/comment state, and form submission behavior. Backend tests cover the post/comment lifecycle, ownership, validation, missing records, and GitHub response handling.
@@ -214,7 +215,63 @@ npm run build --prefix client
 
 This generates optimized frontend assets in `client/build`.
 
-`npm start` starts only the backend. The current Express server does not serve the frontend build. Deployment requires static hosting with SPA route fallback and an `/api` reverse proxy to the backend, or additional Express static-serving configuration. The development proxy in `client/package.json` does not configure production hosting.
+With `NODE_ENV=production`, Express serves this build and the API from the same origin. Refreshing frontend routes such as `/profiles` returns React's `index.html`. Unknown `/api` requests and missing asset files return 404 rather than HTML.
+
+For a local production check in PowerShell:
+
+```powershell
+$env:NODE_ENV = "production"
+npm start
+```
+
+Open <http://localhost:5000>. Stop the server and clear the variable with `Remove-Item Env:NODE_ENV` before returning to `npm run dev`.
+
+## Deploy to Render
+
+Deploy this repository as **one Node Web Service**, not a Static Site. MongoDB remains hosted separately, for example in MongoDB Atlas.
+
+1. Commit and push the deployment changes to GitHub.
+2. Open the [Render dashboard](https://dashboard.render.com), choose **New > Web Service**, and connect `swayamkr03/DevConnector`.
+3. Use the following settings:
+
+| Setting | Value |
+| --- | --- |
+| Branch | `main` |
+| Language | Node |
+| Root directory | Leave blank |
+| Build command | `npm ci && npm ci --prefix client && npm run build --prefix client` |
+| Start command | `npm start` |
+| Health check path | `/` |
+
+The committed `.node-version` pins the locally tested Node version. If the service already has a `NODE_VERSION` override, remove it or set it to `24.13.0`.
+
+4. Add environment variables in Render:
+
+| Variable | Value |
+| --- | --- |
+| `NODE_ENV` | `production` |
+| `MONGO_URI` | Your MongoDB Atlas connection string, including the intended database |
+| `JWT_SECRET` | A long random secret generated for this deployment |
+| `GITHUB_TOKEN` | Optional server-side token for GitHub API requests |
+
+`config/custom-environment-variables.json` maps these variables to the existing `config.get('mongoURI')` and `config.get('jwtSecret')` calls. Do not upload `config/default.json`, use React-prefixed secrets, or put credentials in Git. You do not need to set `PORT`; the server already uses Render's supplied port.
+
+Generate a JWT secret locally, then paste the output only into Render's secret setting:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+5. In the Render service, open **Connect > Outbound**. Add all listed CIDR ranges to MongoDB Atlas's **Network Access** allowlist. Use a dedicated database user with access limited to the application's database. Avoid opening access to all IPs.
+6. Create/deploy the service. If the first attempt starts before the Atlas allowlist is ready, redeploy after saving the allowlist.
+7. Look for `MongoDB Connected...` and `Server started on port ...` in the logs.
+8. Open the assigned `https://...onrender.com` URL. Check login, profiles, posting, and a direct refresh on `/profiles`.
+
+The frontend's relative `/api` URLs now work on the same service: no separate frontend host, CORS configuration, or production localhost proxy is needed. Keep the development proxy unchanged for local work.
+
+Free web services sleep after 15 minutes without traffic; the next visit can take about a minute to wake them. Free instances are intended for previews/hobby projects rather than production workloads.
+
+Official references: [Express deployment](https://render.com/docs/deploy-node-express-app), [Node versions](https://render.com/docs/node-version), [outbound IP ranges](https://render.com/docs/outbound-ip-addresses), and [free service limitations](https://render.com/docs/free).
 
 ## Troubleshooting
 
