@@ -4,6 +4,12 @@ A full-stack social network for developers built with MongoDB, Express, React, a
 
 This is a learning project based on the MERN Stack Front To Back course, adapted to the dependencies used in this repository.
 
+## Live demo
+
+Visit [DevConnector on Render](https://devconnector-3ctv.onrender.com/).
+
+Browse [developer profiles](https://devconnector-3ctv.onrender.com/profiles) without an account, or register and log in to create your profile and join community discussions.
+
 ## Features
 
 - **Authentication:** register, log in, and access protected pages using JSON Web Tokens (JWT). Passwords are hashed with bcryptjs.
